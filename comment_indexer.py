@@ -63,7 +63,19 @@ def add(directory, batch):
     print(f"[bold]扫描到 {len(py_files)} 个Python文件:[/]")
     for file in tqdm(py_files, desc="处理文件中"):
         rel_path = str(file.relative_to(base_dir))
-        comment_dict[rel_path] = CommentExtractor.extract_comments(file)
+        comments = CommentExtractor.extract_comments(file)
+        comment_dict[rel_path] = comments
+        
+        # 保存原始注释到.raw目录
+        raw_dir = base_dir / ".raw"
+        raw_dir.mkdir(exist_ok=True)
+        raw_path = rel_path.replace("/", "_") + ".txt"
+        raw_file = raw_dir / raw_path
+        try:
+            with open(raw_file, "w", encoding="utf-8") as f:
+                f.write(comments)
+        except IOError as e:
+            logger.error(f"无法保存原始注释文件: {raw_file} - {str(e)}")
   
     # 过滤空注释文件
     valid_files = {k:v for k,v in comment_dict.items() if v.strip()}
