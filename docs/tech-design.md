@@ -20,7 +20,7 @@ graph TD
 #### 设计思路
 1. **注释提取**：使用AST解析文档字符串，配合tokenize获取行级注释
 2. **向量化存储**：用ChromaDB存储注释向量，文件路径作为唯一ID
-3. **交互增强**：PyInquirer实现交互式操作，Rich库美化输出
+3. **交互增强**：questionary实现交互式操作，Rich库美化输出
 4. **错误处理**：对文件解析、DB操作和用户输入进行多层异常处理
 
 **requirements.txt**
@@ -28,7 +28,7 @@ graph TD
 chromadb>=0.4.0
 click>=8.1.0
 rich>=13.0.0
-pyinquirer==1.0.3
+questionary>=2.0.0
 python-dotenv>=1.0.0
 tqdm>=4.0.0
 ```
@@ -118,7 +118,7 @@ from tqdm import tqdm
 import click
 from rich import print
 from rich.logging import RichHandler
-from pyinquirer import prompt
+import questionary
 from dotenv import load_dotenv
 
 from extractors import CommentExtractor
@@ -200,11 +200,7 @@ def add(directory, batch):
 def search(query):
     """查询相似注释（支持交互）"""
     if not query:
-        user_query = prompt([{
-            "type": "input",
-            "name": "query_text",
-            "message": "输入要查询的注释关键词:"
-        }]).get("query_text", "").strip()
+        user_query = questionary.text("输入要查询的注释关键词:").ask().strip()
         if not user_query:
             return
     else:

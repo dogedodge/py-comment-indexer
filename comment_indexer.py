@@ -13,7 +13,7 @@ from tqdm import tqdm
 import click
 from rich import print
 from rich.logging import RichHandler
-from PyInquirer import prompt
+import questionary
 from dotenv import load_dotenv
 
 from extractors import CommentExtractor
@@ -78,11 +78,7 @@ def add(directory, batch):
 def search(query):
     """查询相似注释（支持交互）"""
     if not query:
-        user_query = prompt([{
-            "type": "input",
-            "name": "query_text",
-            "message": "输入要查询的注释关键词:"
-        }]).get("query_text", "").strip()
+        user_query = questionary.text("输入要查询的注释关键词:").ask().strip()
         if not user_query:
             return
     else:
@@ -94,7 +90,7 @@ def search(query):
     if results:
         print(f"[bold]与'[cyan]{user_query}[/cyan]'相似的注释:[/]")
         for i, (file_path, score) in enumerate(results, 1):
-            print(f"  {i}. [yellow]\[相似度:{score}][/] [green]{file_path}[/]")
+            print(f"  {i}. [yellow][相似度:{score}][/] [green]{file_path}[/]")
     else:
         print("[yellow]! 未找到匹配结果[/]")
 
