@@ -12,7 +12,7 @@ graph TD
 ```
 
 ## Main Features
-- 递归遍历指定目录下的Python文件
+- 递归遍历指定目录下的Python文件（自动排除.venv目录）
 - 提取每个Python文件的代码注释（行注释和文档字符串）
 - 将注释与文件路径关联后存入Chroma向量数据库
 - 提供CRUD操作和相似注释搜索功能

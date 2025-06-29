@@ -19,7 +19,9 @@ def scan_python_files(directory: Path) -> List[Path]:
     """
     return [
         p for p in directory.rglob("*.py")
-        if p.is_file() and not p.name.startswith(".")
+        if p.is_file() 
+        and not p.name.startswith(".")
+        and ".venv" not in str(p)  # 排除.venv目录下的文件
     ]
 
 def confirm_dangerous(action: str) -> bool:
