@@ -43,6 +43,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### 配置项
+- `DEFAULT_DB_PATH`: 默认数据库存储路径 (默认值: `chroma_db`)
+
 ### 模块化代码结构
 
 ```bash
@@ -287,3 +290,19 @@ python comment_indexer.py search -q "重要配置"
    - 详细操作日志
 
 > 首次运行会自动下载`sentence-transformers/all-MiniLM-L6-v2`模型（约80MB）
+
+## 已知问题
+
+### ChromaDB遥测功能冲突
+- **现象**：初始化时出现 `posthog.capture() takes 1 positional argument but 3 were given` 错误
+- **原因**：ChromaDB内置的遥测功能与posthog库存在API兼容性问题
+- **解决方案**：
+  1. 代码中设置环境变量：
+     ```python
+     import os
+     os.environ["CHROMA_TELEMETRY"] = "false"  # 完全禁用遥测
+     ```
+  2. 或在运行前设置环境变量：
+     ```bash
+     CHROMA_TELEMETRY=false python comment_indexer.py init
+     ```

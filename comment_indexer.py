@@ -16,6 +16,8 @@ from rich.logging import RichHandler
 import questionary
 from dotenv import load_dotenv
 
+DEFAULT_DB_PATH = "chroma_db"  # 默认数据库存储路径
+
 from extractors import CommentExtractor
 from database import ChromaManager, CommentDict
 from utils import scan_python_files, confirm_dangerous
@@ -103,5 +105,7 @@ def clear():
 
 # ---------------------- 主入口 ----------------------
 if __name__ == "__main__":
+    import os
+    os.environ["CHROMA_TELEMETRY"] = "false"  # 完全禁用ChromaDB遥测
     load_dotenv()  # 加载环境变量
     cli()
