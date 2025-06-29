@@ -6,7 +6,7 @@ Utility functions for PyCommentIndexer
 
 from pathlib import Path
 from typing import List
-from PyInquirer import prompt  # Dependency listed in requirements.txt
+import questionary
 
 def scan_python_files(directory: Path) -> List[Path]:
     """递归扫描目录中的Python文件
@@ -31,10 +31,7 @@ def confirm_dangerous(action: str) -> bool:
     Returns:
         True if user confirms, False otherwise
     """
-    question = {
-        "type": "confirm",
-        "name": "confirm",
-        "message": f"你确定要{action}吗？",
-        "default": False
-    }
-    return prompt([question]).get("confirm", False)
+    return questionary.confirm(
+        f"你确定要{action}吗？",
+        default=False
+    ).ask()
