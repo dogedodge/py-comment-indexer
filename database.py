@@ -12,7 +12,6 @@ logger = logging.getLogger("PyCommentIndexer")
 # ChromaDB配置常量
 DEFAULT_DB_PATH = "./chroma_db"
 COLLECTION_NAME = "python_comments"
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 
 # 类型别名
 CommentDict = Dict[str, str]
@@ -50,8 +49,7 @@ class ChromaManager:
         try:
             return self.client.get_or_create_collection(
                 name=COLLECTION_NAME,
-                metadata={"hnsw:space": "cosine"},
-                embedding_function=EMBEDDING_MODEL
+                metadata={"hnsw:space": "cosine"}
             )
         except Exception as e:
             logger.error(f"DB连接失败: {str(e)}")

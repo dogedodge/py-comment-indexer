@@ -20,7 +20,8 @@ graph TD
 #### 设计思路
 1. **注释提取**：使用AST解析文档字符串，配合tokenize获取行级注释
 2. **向量化存储**：用ChromaDB存储注释向量，文件路径作为唯一ID
-3. **交互增强**：questionary实现交互式操作，Rich库美化输出
+3. **嵌入模型**：使用ChromaDB内置的all-MiniLM-L6-v2模型
+4. **交互增强**：questionary实现交互式操作，Rich库美化输出
 4. **错误处理**：对文件解析、DB操作和用户输入进行多层异常处理
 
 **requirements.txt**
@@ -83,7 +84,7 @@ class ChromaManager:
         """初始化ChromaDB客户端"""
         
     def get_collection(self) -> chromadb.Collection:
-        """获取或创建注释集合"""
+        """获取或创建注释集合（使用ChromaDB内置嵌入模型）"""
         
     def clear_database(self) -> None:
         """清空整个数据库"""
@@ -289,7 +290,7 @@ python comment_indexer.py search -q "重要配置"
    - 语法错误自动处理
    - 详细操作日志
 
-> 首次运行会自动下载`sentence-transformers/all-MiniLM-L6-v2`模型（约80MB）
+> ChromaDB会自动管理内置的all-MiniLM-L6-v2模型
 
 ## 已知问题
 
