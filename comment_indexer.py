@@ -13,7 +13,7 @@ from tqdm import tqdm
 import click
 from rich import print
 from rich.logging import RichHandler
-from pyinquirer import prompt
+from PyInquirer import prompt
 from dotenv import load_dotenv
 
 from extractors import CommentExtractor

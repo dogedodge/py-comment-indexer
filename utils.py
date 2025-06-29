@@ -6,7 +6,7 @@ Utility functions for PyCommentIndexer
 
 from pathlib import Path
 from typing import List
-from pyinquirer import prompt  # Dependency listed in requirements.txt
+from PyInquirer import prompt  # Dependency listed in requirements.txt
 
 def scan_python_files(directory: Path) -> List[Path]:
     """递归扫描目录中的Python文件
