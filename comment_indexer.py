@@ -18,9 +18,9 @@ from dotenv import load_dotenv
 
 DEFAULT_DB_PATH = "chroma_db"  # 默认数据库存储路径
 
-from extractors import CommentExtractor
+from extractor_factory import ExtractorFactory
 from database import ChromaManager, CommentDict
-from utils import scan_python_files, confirm_dangerous
+from utils import scan_source_files, confirm_dangerous
 
 # 配置彩色日志
 logging.basicConfig(
@@ -52,18 +52,19 @@ def init(directory):
 def add(directory, batch):
     """添加目录中的注释到数据库"""
     base_dir = Path(directory)
-    py_files = scan_python_files(base_dir)
-    if not py_files:
-        print("[yellow]! 未找到Python文件[/]")
+    source_files = scan_source_files(base_dir)
+    if not source_files:
+        print("[yellow]! 未找到支持的源代码文件(.py/.ts)[/]")
         return
   
     db = ChromaManager()
     comment_dict = {}
   
-    print(f"[bold]扫描到 {len(py_files)} 个Python文件:[/]")
-    for file in tqdm(py_files, desc="处理文件中"):
+    print(f"[bold]扫描到 {len(source_files)} 个源代码文件:[/]")
+    for file in tqdm(source_files, desc="处理文件中"):
         rel_path = str(file.relative_to(base_dir))
-        comments = CommentExtractor.extract_comments(file)
+        extractor = ExtractorFactory.get_extractor(file)
+        comments = extractor.extract_comments(file)
         comment_dict[rel_path] = comments
         
         # 保存原始注释到.raw目录
@@ -79,7 +80,7 @@ def add(directory, batch):
   
     # 过滤空注释文件
     valid_files = {k:v for k,v in comment_dict.items() if v.strip()}
-    print(f"找到{len(valid_files)}个有注释的文件 (已跳过{len(py_files)-len(valid_files)}个空文件)")
+    print(f"找到{len(valid_files)}个有注释的文件 (已跳过{len(source_files)-len(valid_files)}个空文件)")
   
     if valid_files:
         db.add_comments(valid_files, batch_size=batch)

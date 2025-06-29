@@ -4,16 +4,20 @@
 
 ```mermaid
 graph TD
-    A[comment_indexer.py] -->|imports| B[extractors.py]
-    A -->|imports| C[database.py]
-    A -->|imports| D[utils.py]
-    B -->|uses| D
-    C -->|uses| D
+    A[comment_indexer.py] -->|imports| B[extractor_factory.py]
+    B -->|Python| C[py_extractors.py]
+    B -->|TypeScript| D[ts_extractors.py]
+    A -->|imports| E[database.py]
+    A -->|imports| F[utils.py]
+    C -->|inherits| G[base_extractor.py]
+    D -->|inherits| G[base_extractor.py]
 ```
 
 ## Main Features
-- 递归遍历指定目录下的Python文件（自动排除.venv目录）
-- 提取每个Python文件的代码注释（行注释和文档字符串）
+- 递归遍历指定目录下的Python/TypeScript文件（自动排除.venv目录）
+- 提取代码注释：
+  - Python: 使用AST解析文档字符串和tokenize提取行注释
+  - TypeScript: 使用正则表达式匹配单行(//)和多行(/**/)注释
 - 将原始注释保存到.raw目录便于调试
 - 将注释与文件路径关联后存入Chroma向量数据库
 - 提供CRUD操作和相似注释搜索功能
@@ -55,26 +59,36 @@ pip install -r requirements.txt
 py-comment-indexer/
 ├── comment_indexer.py    # 主入口和CLI命令
 ├── database.py           # ChromaDB管理
-├── extractors.py         # 注释提取功能
+├── extractor_factory.py  # 提取器工厂
+├── base_extractor.py     # 抽象提取器基类
+├── py_extractors.py      # Python注释提取器
+├── ts_extractors.py      # TypeScript注释提取器
 └── utils.py              # 工具函数
 ```
 
-#### extractors.py (注释提取模块)
+#### TypeScript提取器示例
 ```python
-class CommentExtractor:
-    """从Python文件中提取注释"""
+class TypeScriptExtractor(BaseExtractor):
+    """TypeScript语言注释提取器"""
     
     @staticmethod
     def extract_comments(file_path: Path) -> str:
-        """提取文件中的文档字符串和行注释"""
+        # 匹配单行(//)和多行(/**/)注释
+        pattern = r"(\/\/[^\n]*|\/\*[\s\S]*?\*\/)"
+        content = file_path.read_text(encoding="utf-8")
+        return " ".join(match.strip() 
+                      for match in re.findall(pattern, content))
+```
+
+#### Python提取器示例
+```python
+class PythonExtractor(BaseExtractor):
+    """Python语言注释提取器"""
     
-    @staticmethod 
-    def extract_docstrings(file_path: Path) -> str:
-        """使用AST解析文档字符串"""
-        
     @staticmethod
-    def extract_line_comments(file_path: Path) -> str:
-        """使用tokenize提取行注释"""
+    def extract_comments(file_path: Path) -> str:
+        return (PythonExtractor.extract_docstrings(file_path) + " " +
+                PythonExtractor.extract_line_comments(file_path))
 ```
 
 #### database.py (数据库模块)
@@ -127,9 +141,9 @@ from rich.logging import RichHandler
 import questionary
 from dotenv import load_dotenv
 
-from extractors import CommentExtractor
+from extractor_factory import ExtractorFactory
 from database import ChromaManager, CommentDict
-from utils import scan_python_files, confirm_dangerous
+from utils import scan_source_files, confirm_dangerous
 
 # 配置彩色日志
 logging.basicConfig(
@@ -148,11 +162,13 @@ def cli(verbose):
         logger.setLevel(logging.DEBUG)
         logger.debug("调试模式已启用")
 
-def scan_python_files(directory: Path) -> List[Path]:
-    """递归扫描目录中的Python文件"""
+def scan_source_files(directory: Path) -> List[Path]:
+    """递归扫描目录中的源代码文件"""
     return [
-        p for p in directory.rglob("*.py")
-        if p.is_file() and not p.name.startswith(".")
+        p for p in directory.rglob("*.*")
+        if p.suffix in ('.py', '.ts')
+        and p.is_file()
+        and not p.name.startswith(".")
     ]
 
 def confirm_dangerous(action: str) -> bool:
@@ -270,17 +286,22 @@ if __name__ == "__main__":
 ```bash
 # 创建测试文件
 mkdir test_project
+# Python示例
 echo \"\"\"
 数据库配置模块
 \"\"\n\n# 重要: MySQL连接设置 > test_project/db.py
 
+# TypeScript示例
+echo "// API配置\ninterface Config {\n  /* 基础URL */\n  baseUrl: string\n}" > test_project/api.ts
+
 # 索引并搜索
 python comment_indexer.py add test_project
-python comment_indexer.py search -q "重要配置"
+python comment_indexer.py search -q "配置"
 
 # 输出结果
-[bold]与'重要配置'相似的注释:[/]
-  1. [相似度:0.85] db.py
+[bold]与'配置'相似的注释:[/]
+  1. [相似度:0.92] db.py
+  2. [相似度:0.88] api.ts
 ```
 
 ### 设计亮点

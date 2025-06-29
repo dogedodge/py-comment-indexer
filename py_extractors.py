@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Comment extraction functionality for PyCommentIndexer
+Python语言注释提取器实现
 """
 
 import ast
 import tokenize
 from pathlib import Path
 import logging
+from .base_extractor import BaseExtractor
 
 logger = logging.getLogger("PyCommentIndexer")
 
-class CommentExtractor:
-    """从Python文件中提取注释"""
+class PythonExtractor(BaseExtractor):
+    """Python语言注释提取器实现"""
   
     @staticmethod
     def extract_comments(file_path: Path) -> str:
@@ -28,8 +29,8 @@ class CommentExtractor:
         """
         try:
             return (
-                CommentExtractor.extract_docstrings(file_path) + " " +
-                CommentExtractor.extract_line_comments(file_path)
+                PythonExtractor.extract_docstrings(file_path) + " " +
+                PythonExtractor.extract_line_comments(file_path)
             )
         except (SyntaxError, UnicodeDecodeError) as e:
             logger.error(f"解析失败: {file_path} - {str(e)}")
