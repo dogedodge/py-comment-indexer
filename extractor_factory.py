@@ -6,8 +6,8 @@
 """
 
 from pathlib import Path
-from .py_extractors import PythonExtractor
-from .ts_extractors import TypeScriptExtractor
+from py_extractors import PythonExtractor
+from ts_extractors import TypeScriptExtractor
 
 class ExtractorFactory:
     """注释提取器工厂类"""

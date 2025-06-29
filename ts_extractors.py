@@ -6,7 +6,7 @@ TypeScript语言注释提取器实现
 
 import re
 from pathlib import Path
-from .base_extractor import BaseExtractor
+from base_extractor import BaseExtractor
 
 class TypeScriptExtractor(BaseExtractor):
     """TypeScript语言注释提取器实现"""

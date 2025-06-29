@@ -8,7 +8,7 @@ import ast
 import tokenize
 from pathlib import Path
 import logging
-from .base_extractor import BaseExtractor
+from base_extractor import BaseExtractor
 
 logger = logging.getLogger("PyCommentIndexer")
 

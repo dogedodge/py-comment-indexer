@@ -57,6 +57,7 @@ pip install -r requirements.txt
 
 ```bash
 py-comment-indexer/
+├── __init__.py           # 包初始化文件
 ├── comment_indexer.py    # 主入口和CLI命令
 ├── database.py           # ChromaDB管理
 ├── extractor_factory.py  # 提取器工厂
@@ -65,6 +66,10 @@ py-comment-indexer/
 ├── ts_extractors.py      # TypeScript注释提取器
 └── utils.py              # 工具函数
 ```
+
+### 导入规范
+- 使用绝对导入方式（如`from py_extractors import PythonExtractor`）
+- 不再使用相对导入（如`from .py_extractors import PythonExtractor`）
 
 #### TypeScript提取器示例
 ```python
